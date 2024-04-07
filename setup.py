@@ -37,19 +37,28 @@ if system() ==  "Linux":
     libdirs = [libdir]
     rlibdirs = ['$ORIGIN/.']
     libs_to_copy = ["libft4222.so"]
+elif system() == "Darwin":
+    libdir = "./osx"
+    ft4222_dll = "libft4222.dylib"
+
+    libs = ["ft4222"] #, "ftd2xx"]
+    incdirs = ["osx"]
+    libdirs = [libdir]
+    rlibdirs = [] #'$ORIGIN/.']
+    libs_to_copy = [ft4222_dll, "libftd2xx.dylib", "libboost_system.dylib"]
 else:
     if architecture()[0] == '64bit':
         libdir = "win/amd64"
-        ft4222_dll = "LibFT4222-64.dll"
+        libs = ["LibFT4222-64", "ftd2xx"]
+        libs_to_copy = ["LibFT4222-64.dll", "ftd2xx.dll"]
     else:
         libdir = "win/i386"
-        ft4222_dll = "LibFT4222.dll"
+        libs = ["LibFT4222", "ftd2xx"]
+        libs_to_copy = ["LibFT4222.dll", "ftd2xx.dll"]
 
-    libs = ["LibFT4222", "ftd2xx"]
     incdirs = ["win"]
     libdirs = [libdir]
     rlibdirs = []
-    libs_to_copy = [ft4222_dll, "ftd2xx.dll"]
 
 class mybuild(build_py):
     def run(self):
@@ -77,7 +86,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='ft4222',
-    version='1.2.1',
+    version='1.4.0',
     author='Bearsh',
     author_email='me@bearsh.org',
     url='https://gitlab.com/msrelectronics/python-ft4222',
@@ -86,21 +95,31 @@ setup(
     long_description_content_type="text/markdown",
     license='MIT',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: MIT License',
         'License :: Other/Proprietary License',
         'Operating System :: Microsoft',
         'Operating System :: POSIX :: Linux',
+        'Operating System :: MacOS :: MacOS X',
         'Programming Language :: Cython',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Topic :: Communications',
     ],
     keywords='ftdi ft4222',
     packages=['ft4222', 'ft4222.I2CMaster', 'ft4222.GPIO', 'ft4222.SPI', 'ft4222.SPIMaster', 'ft4222.SPISlave'],
+    package_data={
+        'ft4222': ['py.typed', 'ft4222.pyi', '__init__.pyi'],
+        'ft4222.I2CMaster': ['py.typed'],
+        'ft4222.GPIO': ['py.typed'],
+        'ft4222.SPI': ['py.typed'],
+        'ft4222.SPIMaster': ['py.typed'],
+        'ft4222.SPISlave': ['py.typed'],
+    },
     ext_modules=cythonize(extensions),
     cmdclass={'build_py': mybuild},
 )

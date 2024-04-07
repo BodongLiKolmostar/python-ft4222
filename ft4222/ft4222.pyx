@@ -14,6 +14,7 @@ from cpython.array cimport array, resize
 from libc.stdio cimport printf
 from enum import IntEnum
 from .GPIO import Dir, Trigger
+from .I2CMaster import ControllerStatus
 
 IF UNAME_SYSNAME == "Windows":
     cdef extern from "<malloc.h>" nogil:
@@ -224,6 +225,21 @@ cdef class FT4222:
     def __repr__(self):
         return "FT4222: chipVersion: 0x{:x} ({:s}), libVersion: 0x{:x}".format(self._chip_version, self.chipRevision, self._dll_version)
 
+    def setTimeouts(self, read_timeout, write_timeout):
+        """Set the read and write timeouts
+
+        Args:
+            read_timeout (int): Read timeout in milliseconds.
+            write_timeout (int): Write timeout in milliseconds.
+
+        Raises:
+            FT2XXDeviceError: on error
+
+        """
+        status = FT_SetTimeouts(self._handle, read_timeout, write_timeout)
+        if status != FT_OK:
+            raise FT2XXDeviceError, status
+
     def setClock(self, clk):
         """Set the system clock
 
@@ -268,7 +284,7 @@ cdef class FT4222:
         if status != FT4222_OK:
             raise FT4222DeviceError, status
 
-    def setWakeUpInterrut(self, enable):
+    def setWakeUpInterrupt(self, enable):
         """Enable or disable the wakeup/interrupt
 
         Args:
@@ -595,7 +611,7 @@ cdef class FT4222:
         cdef uint8 cs
         status = FT4222_I2CMaster_GetStatus(self._handle, &cs)
         if status == FT4222_OK:
-            return cs
+            return ControllerStatus(cs)
         raise FT4222DeviceError, status
 
     def i2cSlave_Init(self):
